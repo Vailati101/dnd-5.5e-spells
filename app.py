@@ -4,9 +4,9 @@ import requests
 # Configuração da página
 st.set_page_config(page_title="D&D Spellbook & Checker", page_icon="🪄", layout="wide")
 
-# URLs dos dados oficiais do 5e.tools no GitHub
-URL_SPELLS_2024 = "https://raw.githubusercontent.com/5etools-mirror-2/5etools-mirror-2.github.io/master/data/spells/spells-xphb.json"
-URL_SPELLS_2014 = "https://raw.githubusercontent.com/5etools-mirror-2/5etools-mirror-2.github.io/master/data/spells/spells-phb.json"
+# URLs atualizadas para os dados do 5e.tools
+URL_SPELLS_2024 = "https://raw.githubusercontent.com/5etools-mirror-3/5etools-data/main/data/spells/spells-xphb.json"
+URL_SPELLS_2014 = "https://raw.githubusercontent.com/5etools-mirror-3/5etools-data/main/data/spells/spells-phb.json"
 
 @st.cache_data
 def carregar_magias():
@@ -14,20 +14,26 @@ def carregar_magias():
     spells_data = []
     
     # Magias 2024 (5.5e / xphb)
-    res_2024 = requests.get(URL_SPELLS_2024)
-    if res_2024.status_code == 200:
-        for s in res_2024.json().get("spell", []):
-            s["edition"] = "D&D 5.5e (2024)"
-            s["source_code"] = "xphb"
-            spells_data.append(s)
+    try:
+        res_2024 = requests.get(URL_SPELLS_2024)
+        if res_2024.status_code == 200:
+            for s in res_2024.json().get("spell", []):
+                s["edition"] = "D&D 5.5e (2024)"
+                s["source_code"] = "xphb"
+                spells_data.append(s)
+    except:
+        pass
             
     # Magias 2014 (5e / phb)
-    res_2014 = requests.get(URL_SPELLS_2014)
-    if res_2014.status_code == 200:
-        for s in res_2014.json().get("spell", []):
-            s["edition"] = "D&D 5e (2014)"
-            s["source_code"] = "phb"
-            spells_data.append(s)
+    try:
+        res_2014 = requests.get(URL_SPELLS_2014)
+        if res_2014.status_code == 200:
+            for s in res_2014.json().get("spell", []):
+                s["edition"] = "D&D 5e (2014)"
+                s["source_code"] = "phb"
+                spells_data.append(s)
+    except:
+        pass
             
     return spells_data
 
@@ -79,7 +85,6 @@ with aba_busca:
                 st.write(f"**Escola:** {spell.get('school', 'N/A').upper()}")
                 st.write(f"**Fonte Oficial:** {spell.get('source_code').upper()}")
                 
-                # Exibe pequeno resumo das linhas de texto se houver
                 entries = spell.get("entries", [])
                 for entry in entries:
                     if isinstance(entry, str):
@@ -108,7 +113,6 @@ with aba_grimorio:
     else:
         st.success(f"Você tem **{len(st.session_state.grimorio)}** magia(s) preparada(s).")
         
-        # Filtra apenas as magias favoritadas
         magias_preparadas = [s for s in spells if f"{s.get('name')}_{s.get('source_code')}" in st.session_state.grimorio]
         
         for spell in magias_preparadas:
